@@ -9,6 +9,10 @@ class Part1:
         # self.graph(data)
         # self.graph_frontiere(data)
 
+        per = Perceptron(0.01)
+        out = per.grad_output(data['X'][0], data['D'][0])
+        print(out)
+
     def load(self, path="lab1_1.npz"):
         return np.load(path)
     
@@ -100,12 +104,24 @@ class Perceptron:
             Gradient de l'erreur par rapport à la sortie y perceptron $\nabla_y E$.
 
         """
-        y = self.sigmoide(np.dot(self.w, x))
-        e = 1/2 * (y - d)**2
-        self.w = self.w - self.lr * grad_output * e
+        self.w = self.w - self.lr * grad_output
 
     def sigmoide(self, x):
         return 1 / (1 + math.exp(-x))
+    
+    def grad_output(self, data, d) -> float:
+        grad = []
+
+        temp = 0
+        for index, w_i in enumerate(self.w):
+            try:
+                y_j = self.sigmoide(np.dot(data[index], w_i))
+            except:
+                y_j = self.sigmoide(np.dot(1, w_i))
+            temp += y_j
+        grad.append((temp - d)* temp * (1 - temp) * data)       
+
+        return np.array(grad)[0]
     
 if __name__ == "__main__":
     Part1().execute()
