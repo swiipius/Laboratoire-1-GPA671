@@ -94,11 +94,23 @@ class Part1:
     def graph_front_and_update(self, data: np.ndarray, w0_up, w1_up, w2_up, w0=0, w1=-1, w2=-1) -> None:
         x = data['X'][:, 0]
         y = data['X'][:, 1]
+
+        class1 = False
+        class2 = False
+
         for i in range(len(data['X'])):
             if data['D'][i] == 1.:
-                plt.plot(x[i], y[i], 'o', color='b', label='Class 1')
+                if not class1:
+                    plt.plot(x[i], y[i], 'o', color='b', label='Class 1')
+                    class1 = True
+                else:
+                    plt.plot(x[i], y[i], 'o', color='b')
             else:
-                plt.plot(x[i], y[i], 'o', color='r', label='Class 0')
+                if not class2:
+                    plt.plot(x[i], y[i], 'o', color='r', label='Class 0')
+                    class2 = True
+                else:
+                    plt.plot(x[i], y[i], 'o', color='r')
         plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere initiale')
         plt.plot(self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), np.linspace(-2, 2), label='Frontiere mise a jour')
         plt.legend()
