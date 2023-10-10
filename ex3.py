@@ -11,8 +11,11 @@ class Part1:
         # # Question 2
         # self.graph(data)
 
-        # # Question 3
+        # Question 3
         # self.graph_frontiere(data, 0, -1, -1)
+
+        # # Question 4
+        # self.exactitude(data)
 
         per_0 = Perceptron(0.01)
 
@@ -29,13 +32,15 @@ class Part1:
         #         up = per_1.update(grad_output=grad)
         # self.graph_front_and_update(data, w0_up=per_1.w[0], w1_up=per_1.w[1], w2_up=per_1.w[2])
 
-        # Question 8
+        # # Question 8
         per_2 = Perceptron(0.01)
         for i in range(1000):
             for j in range(len(data['X'])):
                 grad = per_2.grad_output(data['X'][j], data['D'][j])
                 up = per_2.update(grad_output=grad)
+
         self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
+        self.exactitude(data, w0=per_2.w[0], w1=per_2.w[1], w2=per_2.w[2])
         
 
     def load(self, path="lab1_1.npz"):
@@ -97,10 +102,30 @@ class Part1:
         plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere initiale')
         plt.plot(self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), np.linspace(-2, 2), label='Frontiere mise a jour')
         plt.legend()
-        plt.show()
+        plt.show()       
 
-    def exactitude(self):
-        pass
+    def exactitude(self, data, w0=0, w1=-1, w2=-1):
+        tp = 0
+        fp = 0
+
+        per = Perceptron(0.01)
+        data_w_bia = np.insert(data['X'], 0, 1, axis=1)
+
+        for index, elem in enumerate(data_w_bia):
+            # On a décidé d'inclure le 0.5
+            if per.forward(elem) >= 0.5:
+                if data['D'][index] == 1:
+                    tp += 1
+                else:
+                    fp += 1
+            else:
+                if data['D'][index] == 0:
+                    tp += 1
+                else:
+                    fp += 1
+            
+        print("Exactitude: ", tp / (tp + fp) * 100)
+
     
 class Perceptron:
     
@@ -157,10 +182,10 @@ class Perceptron:
         temp = 0
 
         # Add bias to data
+        # data = np.insert(data, 0, 1)
         data = np.append(data, 1)
-        temp = np.dot(data, self.w)
 
-        y_i = self.sigmoide(temp)
+        y_i = self.forward(data)
         grad.append((y_i - d)* y_i * (1 - y_i) * data)
 
         return np.array(grad)[0]
