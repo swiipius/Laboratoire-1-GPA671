@@ -5,13 +5,38 @@ import math
 
 class Part1:
     def execute(self):
+        # Question 1
         data = self.load()
-        # self.graph(data)
-        # self.graph_frontiere(data)
 
-        per = Perceptron(0.01)
-        out = per.grad_output(data['X'][0], data['D'][0])
-        print(out)
+        # # Question 2
+        # self.graph(data)
+
+        # # Question 3
+        # self.graph_frontiere(data, 0, -1, -1)
+
+        per_0 = Perceptron(0.01)
+
+        # # Question 6
+        # grad = per_0.grad_output(data['X'][j], data['D'][j])
+        # per_0.update(grad_output=grad)
+        # self.graph_front_and_update(data, w0_up=per_0.w[0], w1_up=per_0.w[1], w2_up=per_0.w[2])
+
+        # # Question 7
+        # per_1 = Perceptron(0.01)
+        # for i in range(100):
+        #     for j in range(len(data['X'])):
+        #         grad = per_1.grad_output(data['X'][j], data['D'][j])
+        #         up = per_1.update(grad_output=grad)
+        # self.graph_front_and_update(data, w0_up=per_1.w[0], w1_up=per_1.w[1], w2_up=per_1.w[2])
+
+        # Question 8
+        per_2 = Perceptron(0.01)
+        for i in range(1000):
+            for j in range(len(data['X'])):
+                grad = per_2.grad_output(data['X'][j], data['D'][j])
+                up = per_2.update(grad_output=grad)
+        self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
+        
 
     def load(self, path="lab1_1.npz"):
         return np.load(path)
@@ -50,15 +75,32 @@ class Part1:
         plt.legend()
         plt.show()
     
-    def graph_frontiere(self, data: np.ndarray) -> None:
+    def graph_frontiere(self, data: np.ndarray, w0=0, w1=-1, w2=-1) -> None:
         x = data['X'][:, 0]
         y = data['X'][:, 1]
-        plt.plot(x, y, 'o')
-        plt.plot(self.frontiere(np.linspace(-2, 2)), np.linspace(-2, 2))
+        plt.plot(x, y, 'o', label='Donnees')
+        plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere')
+        plt.legend()
         plt.show()
 
-    def frontiere(self, x, w0=0, w1=-1, w2=-1):
+    def frontiere(self, x, w0, w1, w2):
         return (-w1/w2)*x - (w0/w2)
+    
+    def graph_front_and_update(self, data: np.ndarray, w0_up, w1_up, w2_up, w0=0, w1=-1, w2=-1) -> None:
+        x = data['X'][:, 0]
+        y = data['X'][:, 1]
+        for i in range(len(data['X'])):
+            if data['D'][i] == 1.:
+                plt.plot(x[i], y[i], 'o', color='b', label='Class 1')
+            else:
+                plt.plot(x[i], y[i], 'o', color='r', label='Class 0')
+        plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere initiale')
+        plt.plot(self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), np.linspace(-2, 2), label='Frontiere mise a jour')
+        plt.legend()
+        plt.show()
+
+    def exactitude(self):
+        pass
     
 class Perceptron:
     
@@ -92,7 +134,7 @@ class Perceptron:
         """
         return self.sigmoide(np.dot(self.w, x))
     
-    def update(self, x: np.ndarray, grad_output: float) -> None:
+    def update(self, grad_output: np.ndarray, x: np.ndarray = None) -> None:
         """
         Mise à jour des poids w.
         
@@ -100,7 +142,7 @@ class Perceptron:
         ----------
         x : np.ndarray
             Vecteur d'entrée de longueur 2.
-        grad_output : np.float
+        grad_output : np.ndarray
             Gradient de l'erreur par rapport à la sortie y perceptron $\nabla_y E$.
 
         """
@@ -113,13 +155,13 @@ class Perceptron:
         grad = []
 
         temp = 0
-        for index, w_i in enumerate(self.w):
-            try:
-                y_j = self.sigmoide(np.dot(data[index], w_i))
-            except:
-                y_j = self.sigmoide(np.dot(1, w_i))
-            temp += y_j
-        grad.append((temp - d)* temp * (1 - temp) * data)       
+
+        # Add bias to data
+        data = np.append(data, 1)
+        temp = np.dot(data, self.w)
+
+        y_i = self.sigmoide(temp)
+        grad.append((y_i - d)* y_i * (1 - y_i) * data)
 
         return np.array(grad)[0]
     
