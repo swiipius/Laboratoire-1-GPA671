@@ -15,32 +15,34 @@ class Part1:
         # self.graph_frontiere(data, 0, -1, -1)
 
         # # Question 4
-        # self.exactitude(data)
-
-        per_0 = Perceptron(0.01)
+        # per_0 = Perceptron(0.01)
+        # print(self.exactitude(per_0, data))
 
         # # Question 6
         # grad = per_0.grad_output(data['X'][j], data['D'][j])
         # per_0.update(grad_output=grad)
         # self.graph_front_and_update(data, w0_up=per_0.w[0], w1_up=per_0.w[1], w2_up=per_0.w[2])
 
-        # # Question 7
-        # per_1 = Perceptron(0.01)
-        # for i in range(100):
-        #     for j in range(len(data['X'])):
-        #         grad = per_1.grad_output(data['X'][j], data['D'][j])
-        #         up = per_1.update(grad_output=grad)
-        # self.graph_front_and_update(data, w0_up=per_1.w[0], w1_up=per_1.w[1], w2_up=per_1.w[2])
+        # Question 7
+        per_1 = Perceptron(0.01)
+        exactitude = []
+        for i in range(100):
+            exactitude.append(self.exactitude(per_1, data, w0=per_1.w[0], w1=per_1.w[1], w2=per_1.w[2]))
+            for j in range(len(data['X'])):
+                grad = per_1.grad_output(data['X'][j], data['D'][j])
+                up = per_1.update(grad_output=grad)
+        plt.plot(exactitude)
+        plt.show()
 
         # # Question 8
-        per_2 = Perceptron(0.01)
-        for i in range(1000):
-            for j in range(len(data['X'])):
-                grad = per_2.grad_output(data['X'][j], data['D'][j])
-                up = per_2.update(grad_output=grad)
+        # per_2 = Perceptron(0.01)
+        # for i in range(1000):
+        #     for j in range(len(data['X'])):
+        #         grad = per_2.grad_output(data['X'][j], data['D'][j])
+        #         per_2.update(grad_output=grad)
 
-        self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
-        self.exactitude(data, w0=per_2.w[0], w1=per_2.w[1], w2=per_2.w[2])
+        # self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
+        # self.exactitude(per_2, data, w0=per_2.w[0], w1=per_2.w[1], w2=per_2.w[2])
         
 
     def load(self, path="lab1_1.npz"):
@@ -111,32 +113,36 @@ class Part1:
                     class2 = True
                 else:
                     plt.plot(x[i], y[i], 'o', color='r')
-        plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere initiale')
-        plt.plot(self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), np.linspace(-2, 2), label='Frontiere mise a jour')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
         plt.legend()
-        plt.show()       
+        plt.show()        
 
-    def exactitude(self, data, w0=0, w1=-1, w2=-1):
+    def exactitude(self, perceptron, data, w0=0, w1=-1, w2=-1):
         tp = 0
         fp = 0
+        fn = 0
+        tn = 0
 
-        per = Perceptron(0.01)
         data_w_bia = np.insert(data['X'], 0, 1, axis=1)
 
         for index, elem in enumerate(data_w_bia):
             # On a décidé d'inclure le 0.5
-            if per.forward(elem) >= 0.5:
+            if perceptron.forward(elem) >= 0.5:
                 if data['D'][index] == 1:
                     tp += 1
                 else:
                     fp += 1
             else:
                 if data['D'][index] == 0:
-                    tp += 1
+                    tn += 1
                 else:
-                    fp += 1
+                    fn += 1
             
-        print("Exactitude: ", tp / (tp + fp) * 100)
+        try:
+            return tp / (tp + fp) * 100
+        except ZeroDivisionError:
+            return 0
 
     
 class Perceptron:
@@ -189,18 +195,16 @@ class Perceptron:
         return 1 / (1 + math.exp(-x))
     
     def grad_output(self, data, d) -> float:
-        grad = []
 
         temp = 0
 
         # Add bias to data
-        # data = np.insert(data, 0, 1)
-        data = np.append(data, 1)
+        data = np.insert(data, 0, 1)
+        # data = np.append(data, 1)
 
         y_i = self.forward(data)
-        grad.append((y_i - d)* y_i * (1 - y_i) * data)
 
-        return np.array(grad)[0]
+        return (y_i - d)* y_i * (1 - y_i) * data
     
 if __name__ == "__main__":
     Part1().execute()
