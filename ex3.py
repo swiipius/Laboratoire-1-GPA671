@@ -2,14 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import math
-import time
 
 class Part1:
     def execute(self):
         # Question 1
         data = self.load()
 
-        # # Question 2
+        # Question 2
         # self.graph(data)
 
         # Question 3
@@ -254,6 +253,7 @@ class Perceptron:
             Gradient de l'erreur par rapport à la sortie y perceptron $\nabla_y E$.
 
         """
+        print(grad_output)
         self.w = self.w - self.lr * grad_output
 
     def sigmoide(self, x):
