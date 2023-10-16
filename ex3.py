@@ -24,25 +24,26 @@ class Part1:
         # self.graph_front_and_update(data, w0_up=per_0.w[0], w1_up=per_0.w[1], w2_up=per_0.w[2])
 
         # Question 7
-        per_1 = Perceptron(0.01)
-        exactitude = []
-        for i in range(100):
-            exactitude.append(self.exactitude(per_1, data, w0=per_1.w[0], w1=per_1.w[1], w2=per_1.w[2]))
-            for j in range(len(data['X'])):
-                grad = per_1.grad_output(data['X'][j], data['D'][j])
-                up = per_1.update(grad_output=grad)
-        plt.plot(exactitude)
-        plt.show()
-
-        # # Question 8
-        # per_2 = Perceptron(0.01)
+        # per_1 = Perceptron(0.01)
+        # exactitude = []
         # for i in range(1000):
+        #     exactitude.append(self.exactitude(per_1, data))
         #     for j in range(len(data['X'])):
-        #         grad = per_2.grad_output(data['X'][j], data['D'][j])
-        #         per_2.update(grad_output=grad)
+        #         grad = per_1.grad_output(data['X'][j], data['D'][j])
+        #         up = per_1.update(grad_output=grad)
+        # Le taux d'exactitude atteint 100% à la 139ème époque
+        # plt.plot(exactitude)
+        # plt.show()
 
-        # self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
-        # self.exactitude(per_2, data, w0=per_2.w[0], w1=per_2.w[1], w2=per_2.w[2])
+        # Question 8
+        per_2 = Perceptron(0.01)
+        for _ in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100%
+            for j in range(len(data['X'])):
+                grad = per_2.grad_output(data['X'][j], data['D'][j])
+                per_2.update(grad_output=grad)
+
+        self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
+        print(self.exactitude(per_2, data))
         
 
     def load(self, path="lab1_1.npz"):
@@ -86,7 +87,7 @@ class Part1:
         x = data['X'][:, 0]
         y = data['X'][:, 1]
         plt.plot(x, y, 'o', label='Donnees')
-        plt.plot(self.frontiere(np.linspace(-2, 2), w0, w1, w2), np.linspace(-2, 2), label='Frontiere')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere')
         plt.legend()
         plt.show()
 
@@ -118,11 +119,8 @@ class Part1:
         plt.legend()
         plt.show()        
 
-    def exactitude(self, perceptron, data, w0=0, w1=-1, w2=-1):
-        tp = 0
-        fp = 0
-        fn = 0
-        tn = 0
+    def exactitude(self, perceptron, data):
+        tp, fp, tn, fn = 0, 0, 0, 0
 
         data_w_bia = np.insert(data['X'], 0, 1, axis=1)
 
@@ -140,7 +138,7 @@ class Part1:
                     fn += 1
             
         try:
-            return tp / (tp + fp) * 100
+            return (tp + tn) / len(data['X']) * 100
         except ZeroDivisionError:
             return 0
 
@@ -195,12 +193,8 @@ class Perceptron:
         return 1 / (1 + math.exp(-x))
     
     def grad_output(self, data, d) -> float:
-
-        temp = 0
-
         # Add bias to data
         data = np.insert(data, 0, 1)
-        # data = np.append(data, 1)
 
         y_i = self.forward(data)
 
