@@ -1,0 +1,42 @@
+Exercice 1:
+4. Pour chaque détecteur, calculer la valeur de l'aire sous la courbe (Area Under Curve ou AUC). Commenter la méthode utilisée pour calculer l'aire et l'impact du choix de cette méthode sur l'indicateur de performance obtenu.
+metrics.auc(x, y) avec x le array voulu en abscisses (ici: array trié de false positive rates) et y le array voulu en ordonnées (ici: array trié de rappels). La fonction utilise la méthode des trapèzes pour assimiler l’aire sous la courbe. Avec cette méthode de calculation, l’indicateur est sous-estimé ou sur-estimé par rapport à sa courbure: L’aire sous la courbe est sur-estimé si la courbe est convexe, car une partie de l’aire au dessus de la courbe est tenue en compte en plus de l’aire entièrement en dessous. De la même manière, l’aire sous la courbe est sous-estimé quand la courbe est concave.
+
+6. Expliquer pourquoi le taux FPR n'est pas très indicatif dans ce cas de classification.
+Dans ce cas de classification, nous n’avons pas toujours de vrai négatifs pour tous le détecteurs. Par conséquent, le taux FPR revient à 1, car FP / (FP+TN) = FP / FP pour TN=0.
+
+
+Exercice 2:
+6. Expliquer pourquoi la courbe Précision-Rappel est plus adaptée pour mesurer les performances.
+Ce qui nous intéresse sur une méthode de classification, c’est l’identification correcte d’un plus grand nombre de positifs et seulement de positifs. Donc, il suffit d’analyser le nombre de positifs correctement identifiés par rapport à ceux identifiés incorrectement comme positifs. Le taux de précision par rapport au rappel est alors plus adapté pour mesurer les performances que le taux FPR.
+
+
+Exercice 3:
+4. Implémenter la propagation directe dans la méthode forward du Perceptron avec la classe fournie ci-dessous. Calculer le taux d'exactitude avec les poids initiaux en utilisant la fonction forward. Commenter ce taux d'exactitude par rapport à la figure générée précédemment. Que faut-il ajouter dans le graphique pour correctement représenter la frontière de décision?
+Le taux d’exactitude prend en compte plus d’informations que la frontière de décision seule. Le second indique seulement la classification d’après les calculs, alors que le premier exprime si la classification a été réussie.
+Pour correctement représenter la frontière de décision, il faut indiquer dans le graphique, quel côté représente quel décision: classification positive ou négative. À ce but, nous pouvons nous servir de la normale.
+
+5. Implémenter la mise à jour des poids dans la méthode update. Pour cet exercice, la fonction update ne renvoie rien. Effectuer un ajustement des poids en utilisant le premier exemple et 𝜂= 0.01. Dans le rapport, détailler les calculs pour cette étape.
+Des poids initiaux, on soustrait le gradient de la fonction de coût par rapport aux poids multiplié par le taux d’apprentissage. De cette manière, on met à jour le poids en fonction de 1% du coût par rapport au poids précédent (avec 𝜂= 0.01).
+
+7. Continuer l’apprentissage en faisant 100 itérations sur l'ensemble les données. Tracer l’évolution du taux d'exactitude avec chaque ajustement. Commenter la courbe.
+Après 100 époques, le taux d’exactitude n’a pas encore atteint 100, mais 62,5%. Alors que, faisant 1000 époques, le taux d’exactitude atteint 100% à la 139ème époque.
+
+9. Comment se termine l’apprentissage. Est-ce que l’algorithme converge ? Expliquer pourquoi. Commenter le taux d'exactitude de la solution finale.
+L’algorithme converge au delà de 139 époques – le moment où le taux d’exactitude atteint 100%. La courbe sigmoïde classe les données et, après les nombreux itérations sur l’ensemble des données, le perceptron est assez entraîné pour parfaitement classer toutes les données.
+
+10. Que se passerait-il si on changeait l’ordre de présentation des données ?
+Avec les données mélangées aléatoirement, le taux d’exactitude après 100 itérations est toujours à 62,5%. Quant au moment de l’arrivée à 100%, ceci s’est décalé d’une époque: Avec différentes permutations des données, le taux d’exactitude atteint 100% à la 138ème époque, soit une plus tôt qu’avec les données dans l’ordre de l’énoncé.
+
+
+Exercice 4:
+5. Comment se termine l’apprentissage. Est-ce que l’algorithme converge ? Expliquer pourquoi. Commenter le taux d'exactitude de la solution finale.
+XXXX
+
+6. Que se passerait-il si on changeait l’ordre de présentation des données ?
+XXXX
+
+
+Exercice 5:
+2. Essayer d'autres configurations de réseaux multicouches (e.g. ajouter des couches, augmenter le nombre de neurones par couche, etc.) et de paramètres d'entrainement (e.g. augmenter le taux d'apprentissage, faire plus d'itérations, etc.). Quel critère avez-vous utilisé pour arrêter valider l'entrainement ? Quel critère avez-vous utilisé pour comparer les différentes configurations ?
+XXXX
