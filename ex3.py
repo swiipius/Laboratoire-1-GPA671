@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import math
+import time
 
 class Part1:
     def execute(self):
@@ -36,14 +37,32 @@ class Part1:
         # plt.show()
 
         # Question 8
-        per_2 = Perceptron(0.01)
-        for _ in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100%
-            for j in range(len(data['X'])):
-                grad = per_2.grad_output(data['X'][j], data['D'][j])
-                per_2.update(grad_output=grad)
+        # per_2 = Perceptron(0.01)
+        # for _ in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100%
+        #     for j in range(len(data['X'])):
+        #         grad = per_2.grad_output(data['X'][j], data['D'][j])
+        #         per_2.update(grad_output=grad)
 
-        self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
-        print(self.exactitude(per_2, data))
+        # self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
+        # print(self.exactitude(per_2, data))
+
+        # Question 10
+        permut  = np.random.permutation(len(data['X']))
+        print("permutation : ", permut)
+        data_permut_x = np.array([data['X'][i] for i in permut])
+        data_permut_d = np.array([data['D'][i] for i in permut])
+        
+        per_3 = Perceptron(0.01)
+        for i in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100% (avec la permutation le breakpoint est a 138)
+            for j in range(len(data_permut_x)):
+                grad = per_3.grad_output(data_permut_x[j], data_permut_d[j])
+                per_3.update(grad_output=grad)
+            if self.exactitude_array(per_3, data_permut_x, data_permut_d) == 100:
+                print("Taux de 100% (premier index) : ", i)
+                break
+
+        self.graph_front_and_update_array(data_permut_x, data_permut_d, w0_up=per_3.w[0], w1_up=per_3.w[1], w2_up=per_3.w[2])
+        print("Exactitude : ", self.exactitude_array(per_3, data_permut_x, data_permut_d))
         
 
     def load(self, path="lab1_1.npz"):
@@ -117,6 +136,31 @@ class Part1:
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
         plt.legend()
+        plt.show()
+
+    def graph_front_and_update_array(self, data_x, data_d, w0_up, w1_up, w2_up, w0=0, w1=-1, w2=-1) -> None:
+        x = data_x[:, 0]
+        y = data_x[:, 1]
+
+        class1 = False
+        class2 = False
+
+        for i in range(len(data_x)):
+            if data_d[i] == 1.:
+                if not class1:
+                    plt.plot(x[i], y[i], 'o', color='b', label='Class 1')
+                    class1 = True
+                else:
+                    plt.plot(x[i], y[i], 'o', color='b')
+            else:
+                if not class2:
+                    plt.plot(x[i], y[i], 'o', color='r', label='Class 0')
+                    class2 = True
+                else:
+                    plt.plot(x[i], y[i], 'o', color='r')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
+        plt.legend()
         plt.show()        
 
     def exactitude(self, perceptron, data):
@@ -139,6 +183,29 @@ class Part1:
             
         try:
             return (tp + tn) / len(data['X']) * 100
+        except ZeroDivisionError:
+            return 0
+        
+    def exactitude_array(self, perceptron, data_x, data_d):
+        tp, fp, tn, fn = 0, 0, 0, 0
+
+        data_w_bia = np.insert(data_x, 0, 1, axis=1)
+
+        for index, elem in enumerate(data_w_bia):
+            # On a décidé d'inclure le 0.5
+            if perceptron.forward(elem) >= 0.5:
+                if data_d[index] == 1:
+                    tp += 1
+                else:
+                    fp += 1
+            else:
+                if data_d[index] == 0:
+                    tn += 1
+                else:
+                    fn += 1
+            
+        try:
+            return (tp + tn) / len(data_x) * 100
         except ZeroDivisionError:
             return 0
 
