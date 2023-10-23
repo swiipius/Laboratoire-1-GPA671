@@ -152,8 +152,8 @@ class Part2:
         return np.unique(self.data[:, 0])
 
 if __name__ == "__main__":
-    # _1 = Part1()
-    # _1.execute()
+    _1 = Part1()
+    _1.execute()
 
     _2 = Part2()
     _2.execute()
