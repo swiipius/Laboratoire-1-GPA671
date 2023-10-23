@@ -12,7 +12,7 @@ class Execrcice:
     def execute(self):
         data = self.load()
 
-        self.question_4(data)
+        self.question_6(data)
 
     def question_1(self, data):
         self.graph(data)
@@ -31,19 +31,58 @@ class Execrcice:
         forward_out = vec_forward(data_w_bia)
 
         grad_input_temp = np.dot(forward_out - data['D'], np.dot(forward_out, (1 - forward_out)))
-        print(grad_input_temp)
+
         grad_input = []
-        # for index, elem in enumerate(grad_input_temp):
-        #     print(elem)
-            # grad_input.append([ data_w_bia[index][0] * elem, data_w_bia[index][1] * data_w_bia[index][2] * elem ])
+        for index, elem in enumerate(grad_input_temp[0]):
+            grad_input.append([ data_w_bia[index][0] * elem, data_w_bia[index][1] * elem, data_w_bia[index][2] * elem ])
 
-        # print(np.array(grad_input))
 
-        # for _ in range(200):
-        #     grad_input = layer.update(data['X'], grad_input, data['D'])
+        exactitude = [self.exactitude(layer, data)]
+        self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
 
-        # print(w0_init, w1_init, w2_init)
-        # print(layer.W[0][0], layer.W[0][1], layer.W[0][2])
+        for _ in range(200):
+            grad_input = layer.update(data['X'], np.array(grad_input), data['D'])
+            exactitude.append(self.exactitude(layer, data))
+            self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
+
+        # self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init)
+
+        plt.plot(exactitude)
+        plt.show()
+
+    def question_6(self, data):
+        permut  = np.random.permutation(len(data['X']))
+        data_permut_x = np.array([data['X'][i] for i in permut])
+        data_permut_d = np.array([data['D'][i] for i in permut])
+
+        layer = Layer(2, 1, 0.01)
+        w0_init, w1_init, w2_init = layer.W[0][0], layer.W[0][1], layer.W[0][2]
+
+        vec_forward = np.vectorize(layer.forward, signature='(n)->()')
+
+        data_w_bia = np.insert(data_permut_x, 0, 1., axis=1)
+        forward_out = vec_forward(data_w_bia)
+
+        grad_input_temp = np.dot(forward_out - data_permut_d, np.dot(forward_out, (1 - forward_out)))
+
+        grad_input = []
+        for index, elem in enumerate(grad_input_temp[0]):
+            grad_input.append([ data_w_bia[index][0] * elem, data_w_bia[index][1] * elem, data_w_bia[index][2] * elem ])
+
+
+        exactitude = [self.exactitude(layer, data)]
+        self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
+
+        for _ in range(200):
+            grad_input = layer.update(data_permut_x, np.array(grad_input), data_permut_d)
+            exactitude.append(self.exactitude(layer, data))
+            self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
+
+        self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init)
+
+        plt.plot(exactitude)
+        plt.show()
+
 
 
 
@@ -133,10 +172,13 @@ class Execrcice:
                     class2 = True
                 else:
                     plt.plot(x[i], y[i], 'o', color='r')
-        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
-        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-1, 1), w0, w1, w2), label='Frontiere initiale')
+        plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-1, 1), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
         plt.legend()
         plt.show() 
+
+    def frontiere(self, x, w0, w1, w2):
+        return (-w1/w2)*x - (w0/w2)
 
 class Layer:
     
@@ -202,7 +244,8 @@ class Layer:
         data_w_bia = np.insert(X, 0, 1., axis=1)
         forward_out = vec_forward(data_w_bia)
 
-        self.W = self.W - np.dot(self.lr, grad_output)
+        for i in range(len(grad_output)):
+                self.W = self.W - np.dot(self.lr, grad_output[i])
 
         return np.dot(forward_out - d[:][0], np.dot(forward_out, (1 - forward_out)))
 
