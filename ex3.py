@@ -9,45 +9,46 @@ class Part1:
         data = self.load()
 
         # Question 2
-        # self.graph(data)
+        self.graph(data)
 
         # Question 3
-        # self.graph_frontiere(data, 0, -1, -1)
+        self.graph_frontiere(data, 0, -1, -1)
 
         # # Question 4
-        # per_0 = Perceptron(0.01)
-        # print(self.exactitude(per_0, data))
+        per_0 = Perceptron(0.01)
+        print("Question 4 : ", self.exactitude(per_0, data))
 
         # # Question 6
-        # grad = per_0.grad_output(data['X'][j], data['D'][j])
-        # per_0.update(grad_output=grad)
-        # self.graph_front_and_update(data, w0_up=per_0.w[0], w1_up=per_0.w[1], w2_up=per_0.w[2])
+        for j in range(len(data['X'])):
+            grad = per_0.grad_output(data['X'][j], data['D'][j])
+            per_0.update(grad_output=grad)
+        self.graph_front_and_update(data, w0_up=per_0.w[0], w1_up=per_0.w[1], w2_up=per_0.w[2], title="Question 6")
 
         # Question 7
-        # per_1 = Perceptron(0.01)
-        # exactitude = []
-        # for i in range(1000):
-        #     exactitude.append(self.exactitude(per_1, data))
-        #     for j in range(len(data['X'])):
-        #         grad = per_1.grad_output(data['X'][j], data['D'][j])
-        #         up = per_1.update(grad_output=grad)
+        per_1 = Perceptron(0.01)
+        exactitude = []
+        for i in range(1000):
+            exactitude.append(self.exactitude(per_1, data))
+            for j in range(len(data['X'])):
+                grad = per_1.grad_output(data['X'][j], data['D'][j])
+                up = per_1.update(grad_output=grad)
         # Le taux d'exactitude atteint 100% à la 139ème époque
-        # plt.plot(exactitude)
-        # plt.show()
+        plt.plot(exactitude)
+        plt.title("Question 7 : Exactitude en fonction du nombre d'epoques")
+        plt.show()
 
         # Question 8
-        # per_2 = Perceptron(0.01)
-        # for _ in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100%
-        #     for j in range(len(data['X'])):
-        #         grad = per_2.grad_output(data['X'][j], data['D'][j])
-        #         per_2.update(grad_output=grad)
+        per_2 = Perceptron(0.01)
+        for _ in range (200): # on a choisit 200 pour etre sur d'atteindre le taux d'exactitude de 100%
+            for j in range(len(data['X'])):
+                grad = per_2.grad_output(data['X'][j], data['D'][j])
+                per_2.update(grad_output=grad)
 
-        # self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2])
-        # print(self.exactitude(per_2, data))
+        self.graph_front_and_update(data, w0_up=per_2.w[0], w1_up=per_2.w[1], w2_up=per_2.w[2], title="Question 8")
+        print("Question 8 (exactitude) : ", self.exactitude(per_2, data))
 
         # Question 10
         permut  = np.random.permutation(len(data['X']))
-        print("permutation : ", permut)
         data_permut_x = np.array([data['X'][i] for i in permut])
         data_permut_d = np.array([data['D'][i] for i in permut])
         
@@ -57,10 +58,11 @@ class Part1:
                 grad = per_3.grad_output(data_permut_x[j], data_permut_d[j])
                 per_3.update(grad_output=grad)
             if self.exactitude_array(per_3, data_permut_x, data_permut_d) == 100:
+                print("Question 10 : ")
                 print("Taux de 100% (premier index) : ", i)
                 break
 
-        self.graph_front_and_update_array(data_permut_x, data_permut_d, w0_up=per_3.w[0], w1_up=per_3.w[1], w2_up=per_3.w[2])
+        self.graph_front_and_update_array(data_permut_x, data_permut_d, w0_up=per_3.w[0], w1_up=per_3.w[1], w2_up=per_3.w[2], title="Question 10")
         print("Exactitude : ", self.exactitude_array(per_3, data_permut_x, data_permut_d))
         
 
@@ -99,6 +101,7 @@ class Part1:
                 class2 = True
 
         plt.legend()
+        plt.title("Question 2")
         plt.show()
     
     def graph_frontiere(self, data: np.ndarray, w0=0, w1=-1, w2=-1) -> None:
@@ -106,13 +109,14 @@ class Part1:
         y = data['X'][:, 1]
         plt.plot(x, y, 'o', label='Donnees')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere')
+        plt.title("Question 3")
         plt.legend()
         plt.show()
 
     def frontiere(self, x, w0, w1, w2):
         return (-w1/w2)*x - (w0/w2)
     
-    def graph_front_and_update(self, data: np.ndarray, w0_up, w1_up, w2_up, w0=0, w1=-1, w2=-1) -> None:
+    def graph_front_and_update(self, data: np.ndarray, w0_up, w1_up, w2_up, title, w0=0, w1=-1, w2=-1) -> None:
         x = data['X'][:, 0]
         y = data['X'][:, 1]
 
@@ -134,10 +138,11 @@ class Part1:
                     plt.plot(x[i], y[i], 'o', color='r')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
+        plt.title(title)
         plt.legend()
         plt.show()
 
-    def graph_front_and_update_array(self, data_x, data_d, w0_up, w1_up, w2_up, w0=0, w1=-1, w2=-1) -> None:
+    def graph_front_and_update_array(self, data_x, data_d, w0_up, w1_up, w2_up, title, w0=0, w1=-1, w2=-1) -> None:
         x = data_x[:, 0]
         y = data_x[:, 1]
 
@@ -159,6 +164,7 @@ class Part1:
                     plt.plot(x[i], y[i], 'o', color='r')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0, w1, w2), label='Frontiere initiale')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-2, 2), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
+        plt.title(title)
         plt.legend()
         plt.show()        
 
@@ -253,7 +259,6 @@ class Perceptron:
             Gradient de l'erreur par rapport à la sortie y perceptron $\nabla_y E$.
 
         """
-        print(grad_output)
         self.w = self.w - self.lr * grad_output
 
     def sigmoide(self, x):
