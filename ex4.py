@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import math
+from sklearn.utils import shuffle
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
@@ -12,6 +13,11 @@ class Execrcice:
     def execute(self):
         data = self.load()
 
+        self.question_1(data)
+        self.question_2(data)
+        self.index = 0
+        self.question_4(data)
+        self.index = 0
         self.question_6(data)
 
     def question_1(self, data):
@@ -19,7 +25,7 @@ class Execrcice:
 
     def question_2(self, data):
         layer = Layer(2, 1, 0.01)
-        print(self.exactitude(layer, data))
+        print("Question 2 : ", self.exactitude(layer, data))
 
     def question_4(self, data):
         layer = Layer(2, 1, 0.01)
@@ -45,15 +51,17 @@ class Execrcice:
             exactitude.append(self.exactitude(layer, data))
             self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
 
-        # self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init)
+        self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init, "Question 4")
 
         plt.plot(exactitude)
+        plt.title("Question 4 : Exactitude en fonction du nombre d'epoques")
         plt.show()
 
     def question_6(self, data):
-        permut  = np.random.permutation(len(data['X']))
-        data_permut_x = np.array([data['X'][i] for i in permut])
-        data_permut_d = np.array([data['D'][i] for i in permut])
+        # permut  = np.random.permutation(len(data['X']))
+        # data_permut_x = np.array([data['X'][i] for i in permut])
+        # data_permut_d = np.array([data['D'][i] for i in permut])
+        data_permut_x, data_permut_d = shuffle(data['X'], data['D'], random_state=0)
 
         layer = Layer(2, 1, 0.01)
         w0_init, w1_init, w2_init = layer.W[0][0], layer.W[0][1], layer.W[0][2]
@@ -70,17 +78,18 @@ class Execrcice:
             grad_input.append([ data_w_bia[index][0] * elem, data_w_bia[index][1] * elem, data_w_bia[index][2] * elem ])
 
 
-        exactitude = [self.exactitude(layer, data)]
+        exactitude = [self.exactitude_array(layer, data_permut_x, data_permut_d)]
         self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
 
         for _ in range(200):
             grad_input = layer.update(data_permut_x, np.array(grad_input), data_permut_d)
-            exactitude.append(self.exactitude(layer, data))
+            exactitude.append(self.exactitude_array(layer, data_permut_x, data_permut_d))
             self.index, self.tp, self.tn, self.fp, self.fn = 0, 0, 0, 0, 0
 
-        self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init)
+        self.graph_front_and_update_array(data['X'], data['D'], layer.W[0][0], layer.W[0][1], layer.W[0][2], w0_init, w1_init, w2_init, "Question 6")
 
         plt.plot(exactitude)
+        plt.title("Question 6 : Exactitude en fonction du nombre d'epoques")
         plt.show()
 
 
@@ -122,6 +131,7 @@ class Execrcice:
 
                 class2 = True
 
+        plt.title("Question 1")
         plt.legend()
         plt.show()
 
@@ -139,6 +149,21 @@ class Execrcice:
         vec_check(forward_result=forward_out, data_d=data['D'])      
         
         return (self.tp + self.tn) / len(data['X']) * 100
+    
+    def exactitude_array(self, layer, data_x, data_d):
+        tp, fp, tn, fn = 0, 0, 0, 0
+
+        data_w_bia = np.insert(data_x, 0, 1., axis=1)
+
+        vec_forward = np.vectorize(layer.forward, signature='(n)->()')
+
+        forward_out = vec_forward(data_w_bia)
+
+        vec_check = np.vectorize(self.check_tp_tn, excluded=['data_d'], otypes=[None])
+
+        vec_check(forward_result=forward_out, data_d=data_d)      
+        
+        return (self.tp + self.tn) / len(data_x) * 100
 
     index = 0
 
@@ -152,7 +177,7 @@ class Execrcice:
 
         self.index += 1
 
-    def graph_front_and_update_array(self, data_x, data_d, w0_up, w1_up, w2_up, w0, w1, w2) -> None:
+    def graph_front_and_update_array(self, data_x, data_d, w0_up, w1_up, w2_up, w0, w1, w2, title) -> None:
         x = data_x[:, 0]
         y = data_x[:, 1]
 
@@ -174,6 +199,7 @@ class Execrcice:
                     plt.plot(x[i], y[i], 'o', color='r')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-1, 1), w0, w1, w2), label='Frontiere initiale')
         plt.plot(np.linspace(-2, 2), self.frontiere(np.linspace(-1, 1), w0_up, w1_up, w2_up), label='Frontiere mise a jour')
+        plt.title(title)
         plt.legend()
         plt.show() 
 
