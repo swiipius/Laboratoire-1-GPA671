@@ -60,7 +60,6 @@ class Part2:
                 data = np.loadtxt(name, dtype=float, delimiter=' ')
 
                 for seuil in seuils:
-                    print(seuil)
                     self.tp_count = 0
                     self.fp_count = 0
                     self.tn_count = 0
@@ -126,7 +125,7 @@ class Part2:
         for elem in values:
             if elem.get('file') == file:
                 out.append(elem.get('fpr'))
-        print(out)
+        # print(out)
         return np.array(out)
     
     def get_recall_by_file(self, values, file):
@@ -148,8 +147,8 @@ class Part2:
         return np.unique(self.data[:, 0])
 
 if __name__ == "__main__":
-    # _1 = Part1()
-    # _1.execute()
+    _1 = Part1()
+    _1.execute()
 
     _2 = Part2()
     _2.execute()
